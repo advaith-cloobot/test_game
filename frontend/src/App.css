@@ -38,9 +38,19 @@ a:hover {
 canvas {
   display: block;
   margin: 0 auto;
+  max-width: 100%;
+  height: auto;
 }
 
-/* Responsive design */
+/* Responsive design for wider canvas */
+@media (max-width: 1200px) {
+  canvas {
+    width: 100%;
+    max-width: 1000px;
+    height: auto;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 1rem;

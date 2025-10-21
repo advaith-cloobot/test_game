@@ -36,6 +36,12 @@ export class PingPongGame {
       speed: 3
     };
     
+    // Add paddle velocity tracking
+    this.userPaddleVelocity = 0;
+    this.computerPaddleVelocity = 0;
+    this.lastUserPaddleY = this.userPaddle.y;
+    this.lastComputerPaddleY = this.computerPaddle.y;
+    
     // Animation
     this.animationId = null;
     this.lastTime = 0;
@@ -142,13 +148,28 @@ export class PingPongGame {
   }
   
   checkPaddleCollision() {
+    // Calculate paddle velocities
+    this.userPaddleVelocity = this.userPaddle.y - this.lastUserPaddleY;
+    this.computerPaddleVelocity = this.computerPaddle.y - this.lastComputerPaddleY;
+    
     // User paddle collision
     if (this.ball.x - this.ball.radius <= this.userPaddle.x + this.userPaddle.width &&
         this.ball.x + this.ball.radius >= this.userPaddle.x &&
         this.ball.y >= this.userPaddle.y &&
         this.ball.y <= this.userPaddle.y + this.userPaddle.height) {
+      
       this.ball.dx = Math.abs(this.ball.dx);
-      this.ball.dx += 0.5; // Increase speed slightly
+      
+      // Adjust ball speed based on paddle velocity
+      const speedMultiplier = 1 + Math.abs(this.userPaddleVelocity) * 0.1;
+      this.ball.dx *= speedMultiplier;
+      
+      // Add paddle velocity to ball's vertical movement
+      this.ball.dy += this.userPaddleVelocity * 0.3;
+      
+      // Ensure minimum speed
+      if (this.ball.dx < 3) this.ball.dx = 3;
+      if (this.ball.dx > 12) this.ball.dx = 12;
     }
     
     // Computer paddle collision
@@ -156,9 +177,24 @@ export class PingPongGame {
         this.ball.x - this.ball.radius <= this.computerPaddle.x + this.computerPaddle.width &&
         this.ball.y >= this.computerPaddle.y &&
         this.ball.y <= this.computerPaddle.y + this.computerPaddle.height) {
+      
       this.ball.dx = -Math.abs(this.ball.dx);
-      this.ball.dx -= 0.5; // Increase speed slightly
+      
+      // Adjust ball speed based on paddle velocity
+      const speedMultiplier = 1 + Math.abs(this.computerPaddleVelocity) * 0.1;
+      this.ball.dx *= speedMultiplier;
+      
+      // Add paddle velocity to ball's vertical movement
+      this.ball.dy += this.computerPaddleVelocity * 0.3;
+      
+      // Ensure minimum speed
+      if (this.ball.dx > -3) this.ball.dx = -3;
+      if (this.ball.dx < -12) this.ball.dx = -12;
     }
+    
+    // Update last positions for next frame
+    this.lastUserPaddleY = this.userPaddle.y;
+    this.lastComputerPaddleY = this.computerPaddle.y;
   }
   
   updateComputerPaddle() {
@@ -208,8 +244,13 @@ export class PingPongGame {
     this.ctx.stroke();
     this.ctx.setLineDash([]);
     
-    // Draw ball
-    this.ctx.fillStyle = '#fff';
+    // Draw ball with speed-based color
+    const speed = Math.sqrt(this.ball.dx * this.ball.dx + this.ball.dy * this.ball.dy);
+    const intensity = Math.min(speed / 10, 1); // Normalize speed to 0-1
+    const red = Math.floor(255 * intensity);
+    const green = Math.floor(255 * (1 - intensity));
+    
+    this.ctx.fillStyle = `rgb(${red}, ${green}, 255)`;
     this.ctx.beginPath();
     this.ctx.arc(this.ball.x, this.ball.y, this.ball.radius, 0, Math.PI * 2);
     this.ctx.fill();

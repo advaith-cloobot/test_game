@@ -121,7 +121,7 @@ const Game = () => {
 
         <canvas
           ref={canvasRef}
-          width={800}
+          width={1000}
           height={400}
           style={styles.canvas}
         />
@@ -177,6 +177,8 @@ const Game = () => {
         <div style={styles.instructions}>
           <p><strong>Instructions:</strong></p>
           <p>• Move your mouse or use arrow keys to control your paddle</p>
+          <p>• Faster paddle movement = faster ball speed!</p>
+          <p>• Ball color changes with speed (blue = slow, red = fast)</p>
           <p>• First to 3 points wins!</p>
         </div>
       </div>
